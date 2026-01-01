@@ -1,18 +1,27 @@
-package ec.edu.ups.icc.fundamentos01.products.dtos;
+package ec.edu.ups.icc.fundamentos01.products.entities;
 
-public class ProductResponseDto {
-    public int id;
-    public String name;
-    public String description;
-    public double price;
-    public int stock;
-    public String createdAt;
+import ec.edu.ups.icc.fundamentos01.core.entities.BaseModel;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "products")
+public class ProductEntity extends BaseModel {
+    
+    @Column(nullable = false, length = 150)
+    private String name;
+
+    @Column(length = 500)
+    private String description;
+
+    @Column(nullable = false)
+    private double price;
+
+    @Column(nullable = false)
+    private int stock;
     
     // Getters
-    public int getId() {
-        return id;
-    }
-    
     public String getName() {
         return name;
     }
@@ -30,10 +39,6 @@ public class ProductResponseDto {
     }
     
     // Setters
-    public void setId(int id) {
-        this.id = id;
-    }
-    
     public void setName(String name) {
         this.name = name;
     }
@@ -48,13 +53,5 @@ public class ProductResponseDto {
     
     public void setStock(int stock) {
         this.stock = stock;
-    }
-    
-    public String getCreatedAt() {
-        return createdAt;
-    }
-    
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
     }
 }

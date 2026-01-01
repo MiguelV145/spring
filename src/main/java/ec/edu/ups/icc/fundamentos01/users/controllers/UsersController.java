@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
@@ -34,26 +35,29 @@ public class UsersController {
     }
 
     @GetMapping("/{id}")
-    public Object findOne(@PathVariable int id) {
+    public UserResponseDto findOne(@PathVariable("id") int id) {
         return service.findOne(id);
     }
+
     @PostMapping
-    public UserResponseDto create(@RequestBody CreateUserDto dto) {
+    public UserResponseDto create(@Valid @RequestBody CreateUserDto dto) {
         return service.create(dto);
     }
 
     @PutMapping("/{id}")
-    public Object update(@PathVariable int id, @RequestBody UpdateUserDto dto) {
+    public UserResponseDto update(@PathVariable("id") int id,
+                         @Valid @RequestBody UpdateUserDto dto) {
         return service.update(id, dto);
     }
 
     @PatchMapping("/{id}")
-    public Object partialUpdate(@PathVariable int id, @RequestBody PartialUpdateUserDto dto) {
+    public UserResponseDto partialUpdate(@PathVariable("id") int id,
+                                @Valid @RequestBody PartialUpdateUserDto dto) {
         return service.partialUpdate(id, dto);
     }
 
     @DeleteMapping("/{id}")
-    public Object delete(@PathVariable int id) {
-        return service.delete(id);
+    public void delete(@PathVariable("id") int id) {
+        service.delete(id);
     }
 }

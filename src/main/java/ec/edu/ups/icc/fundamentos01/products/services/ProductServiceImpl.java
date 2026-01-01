@@ -1,70 +1,90 @@
 package ec.edu.ups.icc.fundamentos01.products.services;
 
-import java.util.ArrayList;
 import java.util.List;
-import ec.edu.ups.icc.fundamentos01.products.entities.Product;
+
+import org.springframework.stereotype.Service;
+
+import ec.edu.ups.icc.fundamentos01.exception.domain.ConflictException;
+import ec.edu.ups.icc.fundamentos01.exception.domain.NotFoundException;
+import ec.edu.ups.icc.fundamentos01.products.models.Product;
+import ec.edu.ups.icc.fundamentos01.products.entities.ProductEntity;
 import ec.edu.ups.icc.fundamentos01.products.dtos.CreateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.PartialUpdateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
-import ec.edu.ups.icc.fundamentos01.products.mappers.ProductMapper;
+import ec.edu.ups.icc.fundamentos01.products.repositories.ProductRepository;
 
+@Service
 public class ProductServiceImpl implements ProductService {
 
-   
-    private final List<Product> products = new ArrayList<>();
-    private int currentId = 1;
+    private final ProductRepository productRepo;
+
+    public ProductServiceImpl(ProductRepository productRepo) {
+        this.productRepo = productRepo;
+    }
 
     @Override
     public List<ProductResponseDto> findAll() {
-        return products.stream().map(ProductMapper::toResponse).toList();
+        return productRepo.findAll()
+                .stream()
+                .map(Product::fromEntity)
+                .map(Product::toResponseDto)
+                .toList();
     }
 
     @Override
     public ProductResponseDto findOne(int id) {
-        return products.stream()
-                .filter(p -> p.getId() == id)
-                .findFirst()
-                .map(ProductMapper::toResponse)
-                .orElse(null);
+        return productRepo.findById((long) id)
+                .map(Product::fromEntity)
+                .map(Product::toResponseDto)
+                .orElseThrow(() -> new NotFoundException("Producto no encontrado"));
     }
 
     @Override
     public ProductResponseDto create(CreateProductDto dto) {
-        Product product = ProductMapper.toEntity(currentId++, dto.name, dto.description, dto.price, dto.stock);
-        products.add(product);
-        return ProductMapper.toResponse(product);
+        // Regla de negocio: nombre único
+        if (productRepo.findByName(dto.getName()).isPresent()) {
+            throw new ConflictException("Ya existe un producto con el nombre: " + dto.getName());
+        }
+
+        Product product = Product.fromDto(dto);
+        ProductEntity saved = productRepo.save(product.toEntity());
+        return Product.fromEntity(saved).toResponseDto();
     }
 
     @Override
-    public Object update(int id, UpdateProductDto dto) {
-        Product product = products.stream().filter(p -> p.getId() == id).findFirst().orElse(null);
-        if (product == null) return new Object() { public String error = "Product not found"; };
-
-        product.setName(dto.name);
-        product.setDescription(dto.description);
-        product.setPrice(dto.price);
-
-        return ProductMapper.toResponse(product);
+    public ProductResponseDto update(int id, UpdateProductDto dto) {
+        return productRepo.findById((long) id)
+                .map(Product::fromEntity)
+                .map(product -> product.update(dto))
+                .map(Product::toEntity)
+                .map(productRepo::save)
+                .map(Product::fromEntity)
+                .map(Product::toResponseDto)
+                .orElseThrow(() -> new NotFoundException("Producto no encontrado"));
     }
 
     @Override
-    public Object partialUpdate(int id, PartialUpdateProductDto dto) {
-        Product product = products.stream().filter(p -> p.getId() == id).findFirst().orElse(null);
-        if (product == null) return new Object() { public String error = "Product not found"; };
-
-        if (dto.name != null) product.setName(dto.name);
-        if (dto.description != null) product.setDescription(dto.description);
-        if (dto.price != null) product.setPrice(dto.price);
-
-        return ProductMapper.toResponse(product);
+    public ProductResponseDto partialUpdate(int id, PartialUpdateProductDto dto) {
+        return productRepo.findById((long) id)
+                .map(Product::fromEntity)
+                .map(product -> product.partialUpdate(dto))
+                .map(Product::toEntity)
+                .map(productRepo::save)
+                .map(Product::fromEntity)
+                .map(Product::toResponseDto)
+                .orElseThrow(() -> new NotFoundException("Producto no encontrado"));
     }
 
     @Override
-    public Object delete(int id) {
-        boolean removed = products.removeIf(p -> p.getId() == id);
-        if (!removed) return new Object() { public String error = "Product not found"; };
-
-        return new Object() { public String message = "Deleted successfully"; };
+    public void delete(int id) {
+        // Verifica existencia y elimina usando patrón funcional
+        productRepo.findById((long) id)
+            .ifPresentOrElse(
+                productRepo::delete,
+                () -> {
+                    throw new NotFoundException("Producto no encontrado");
+                }
+            );
     }
 }

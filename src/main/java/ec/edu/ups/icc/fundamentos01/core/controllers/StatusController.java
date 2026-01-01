@@ -1,4 +1,4 @@
-package ec.edu.ups.icc.fundamentos01;
+package ec.edu.ups.icc.fundamentos01.core.controllers;
 
 import java.time.LocalDateTime;
 import java.util.Map;

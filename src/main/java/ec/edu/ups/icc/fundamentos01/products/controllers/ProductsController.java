@@ -4,11 +4,9 @@ import ec.edu.ups.icc.fundamentos01.products.dtos.CreateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.PartialUpdateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
-import ec.edu.ups.icc.fundamentos01.products.entities.Product;
-import ec.edu.ups.icc.fundamentos01.products.mappers.ProductMapper;
 import ec.edu.ups.icc.fundamentos01.products.services.ProductService;
+import jakarta.validation.Valid;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -42,24 +40,24 @@ public class ProductsController {
 	}
 
 	@PostMapping
-	public ProductResponseDto create(@RequestBody CreateProductDto dto) {
+	public ProductResponseDto create(@Valid @RequestBody CreateProductDto dto) {
 		return service.create(dto);
 	}
 
 	@PutMapping("/{id}")
-	public Object update(@PathVariable("id") int id,
-	                     @RequestBody UpdateProductDto dto) {
+	public ProductResponseDto update(@PathVariable("id") int id,
+	                     @Valid @RequestBody UpdateProductDto dto) {
 		return service.update(id, dto);
 	}
 
 	@PatchMapping("/{id}")
-	public Object partialUpdate(@PathVariable("id") int id,
-	                            @RequestBody PartialUpdateProductDto dto) {
+	public ProductResponseDto partialUpdate(@PathVariable("id") int id,
+	                            @Valid @RequestBody PartialUpdateProductDto dto) {
 		return service.partialUpdate(id, dto);
 	}
 
 	@DeleteMapping("/{id}")
-	public Object delete(@PathVariable("id") int id) {
-		return service.delete(id);
+	public void delete(@PathVariable("id") int id) {
+		service.delete(id);
 	}
 }

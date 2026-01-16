@@ -10,7 +10,7 @@ import ec.edu.ups.icc.fundamentos01.users.dtos.UserResponseDto;
 public interface UserService {
     List<UserResponseDto> findAll();
 
-     UserResponseDto findOne(int id);
+    UserResponseDto findOne(int id);
 
     UserResponseDto create(CreateUserDto dto);
 
@@ -19,5 +19,7 @@ public interface UserService {
     UserResponseDto partialUpdate(int id, PartialUpdateUserDto dto);
 
     void delete(int id);
+
+
     
 }

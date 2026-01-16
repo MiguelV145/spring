@@ -2,16 +2,18 @@ package ec.edu.ups.icc.fundamentos01.products.models;
 
 import java.time.LocalDateTime;
 
+import ec.edu.ups.icc.fundamentos01.Categories.entity.CategoriaEntity;
 import ec.edu.ups.icc.fundamentos01.products.dtos.CreateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.PartialUpdateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
 import ec.edu.ups.icc.fundamentos01.products.entities.ProductEntity;
+import ec.edu.ups.icc.fundamentos01.users.entities.UserEntity;
 
 public class Product {
 
     // ==================== VARIABLES DE INSTANCIA ====================
-    private int id;
+    private Long id;
     private String name;
     private String description;
     private double price;
@@ -19,36 +21,37 @@ public class Product {
     private LocalDateTime createdAt;
 
     // ==================== CONSTRUCTORES ====================
-    public Product() {}
 
-    public Product(int id, String name, String description, double price, int stock) {
-        // Validaciones de reglas de negocio
-        if (name == null || name.isBlank())
-            throw new IllegalArgumentException("El nombre es obligatorio");
-
-        if (name.length() < 3 || name.length() > 150)
-            throw new IllegalArgumentException("El nombre debe tener entre 3 y 150 caracteres");
-
-        if (price < 0)
-            throw new IllegalArgumentException("El precio no puede ser negativo");
-
-        if (stock < 0)
-            throw new IllegalArgumentException("El stock no puede ser negativo");
-
-        this.id = id;
+    public Product(){
+        
+    }
+   
+    public Product(String name, Double price, String description) {
+        this.validateBusinessRules(name, price, description);
         this.name = name;
-        this.description = description;
         this.price = price;
-        this.stock = stock;
-        this.createdAt = LocalDateTime.now();
+        this.description = description;
     }
 
+    private void validateBusinessRules(String name, Double price, String description) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre del producto es obligatorio");
+        }
+        if (price == null || price <= 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor a 0");
+        }
+        if (description != null && description.length() > 500) {
+            throw new IllegalArgumentException("La descripción no puede superar 500 caracteres");
+        }
+    }
+    
+
     // ==================== GETTERS Y SETTERS ====================
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -94,19 +97,16 @@ public class Product {
 
     // ==================== FACTORY METHODS ====================
 
+
+ 
     /**
      * Crea un Product desde un DTO de creación
      * @param dto DTO con datos del formulario
      * @return instancia de Product para lógica de negocio
      */
+
     public static Product fromDto(CreateProductDto dto) {
-        return new Product(
-            0,                // id = 0 porque aún no existe en BD
-            dto.getName(),
-            dto.getDescription(),
-            dto.getPrice(),
-            dto.getStock()
-        );
+        return new Product(dto.name, dto.price, dto.description);
     }
 
     /**
@@ -114,19 +114,35 @@ public class Product {
      * @param entity Entidad recuperada de la BD
      * @return instancia de Product para lógica de negocio
      */
-    public static Product fromEntity(ProductEntity entity) {
+public static Product fromEntity(ProductEntity entity) {
         Product product = new Product(
-            entity.getId().intValue(),
-            entity.getName(),
-            entity.getDescription(),
-            entity.getPrice(),
-            entity.getStock()
+            entity.getName(), 
+            entity.getPrice(), 
+            entity.getDescription()
         );
-        if (entity.getCreatedAt() != null) {
-            product.setCreatedAt(entity.getCreatedAt());
-        }
+        product.id = entity.getId();
         return product;
     }
+
+    public ProductEntity toEntity(UserEntity owner, CategoriaEntity category) {
+        ProductEntity entity = new ProductEntity();
+        
+        if (this.id != null && this.id > 0) {
+            entity.setId(this.id);
+        }
+        
+        entity.setName(this.name);
+        entity.setPrice(this.price);
+        entity.setDescription(this.description);
+        
+        // Asignar relaciones
+        entity.setOwner(owner);
+        entity.setCategory(category);
+        
+        return entity;
+    }
+
+    
 
     // ==================== CONVERSION METHODS ====================
 
@@ -138,8 +154,8 @@ public class Product {
         ProductEntity entity = new ProductEntity();
 
         // Si ya tiene id, lo asignamos (para updates)
-        if (this.id > 0) {
-            entity.setId((long) this.id);
+        if (this.id != null && this.id > 0) {
+            entity.setId(this.id);
         }
 
         entity.setName(this.name);

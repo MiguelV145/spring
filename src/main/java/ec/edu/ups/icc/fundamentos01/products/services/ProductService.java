@@ -5,6 +5,7 @@ import ec.edu.ups.icc.fundamentos01.products.dtos.CreateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.PartialUpdateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.SecureUpdateProductosDto;
 
 public interface ProductService {
     List<ProductResponseDto> findAll();
@@ -18,4 +19,9 @@ public interface ProductService {
     ProductResponseDto partialUpdate(int id, PartialUpdateProductDto dto);
 
     void delete(int id);
+
+    Boolean validateName (Integer id , String name  ) ;
+
+    ProductResponseDto secureUpdate(int id,  SecureUpdateProductosDto name ) ;
+
 }

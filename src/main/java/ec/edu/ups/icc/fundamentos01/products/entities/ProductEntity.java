@@ -1,8 +1,13 @@
 package ec.edu.ups.icc.fundamentos01.products.entities;
 
+import ec.edu.ups.icc.fundamentos01.Categories.entity.CategoriaEntity;
 import ec.edu.ups.icc.fundamentos01.core.entities.BaseModel;
+import ec.edu.ups.icc.fundamentos01.users.entities.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -20,6 +25,21 @@ public class ProductEntity extends BaseModel {
 
     @Column(nullable = false)
     private int stock;
+
+
+
+    //Atributos relacionales
+    /// Con usuarios donde un usuario puede tener muchos productos 
+    /// 
+    
+    @ManyToOne(optional = false, fetch= FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity owner;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private CategoriaEntity category;
+
     
     // Getters
     public String getName() {
@@ -53,5 +73,21 @@ public class ProductEntity extends BaseModel {
     
     public void setStock(int stock) {
         this.stock = stock;
+    }
+
+    public UserEntity getOwner() {
+        return owner;
+    }
+
+    public void setOwner(UserEntity owner) {
+        this.owner = owner;
+    }
+
+    public CategoriaEntity getCategory() {
+        return category;
+    }
+
+    public void setCategory(CategoriaEntity category) {
+        this.category = category;
     }
 }

@@ -1,6 +1,9 @@
 package ec.edu.ups.icc.fundamentos01.products.services;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
@@ -61,6 +64,7 @@ public class ProductServiceImpl implements ProductService {
         UserEntity owner = userRepo.findById(dto.userId)
             .orElseThrow(() -> new NotFoundException("usuario no existe"));
 
+        Set <CategoriaEntity>  categoriaE= validateCategories();
         CategoriaEntity categoria = categorieRepo.findById(dto.categoryId)
             .orElseThrow(() -> new NotFoundException("categoria no existe"));
         //Convierte DTO-> Domain
@@ -73,6 +77,16 @@ public class ProductServiceImpl implements ProductService {
         return toResponseDto(saved);
     }
 
+    private Set<CategoriaEntity> validateCategories(Set <Long> categoryIds) {
+        Set<CategoriaEntity> list= new HashSet<>();
+        for(Long categoryId: categoryIds){
+            CategoriaEntity category = categorieRepo.findById(categoryId)
+            .orElseThrow(() -> new NotFoundException("Categoria no encontrada con ID:" + categoryIds ));
+            list.add(category);
+        }
+        return list;
+    }
+
     private ProductResponseDto toResponseDto( ProductEntity entity){
         ProductResponseDto dto= new ProductResponseDto();
         dto.id= entity.getId();
@@ -83,27 +97,39 @@ public class ProductServiceImpl implements ProductService {
         ProductResponseDto.UserSummaryDto ownerDto= new ProductResponseDto.UserSummaryDto();
         ownerDto.id = entity.getOwner().getId().intValue();
         ownerDto.name =entity.getOwner().getName();
+        dto.user = ownerDto;
 
+        List<CategoriaResponseDto> list = new ArrayList();
+        for (CategoriaEntity cat : entity.getCategories()){
+            CategoriaResponseDto categoryDto= new CategoriaResponseDto();
+        list.add(categoryDto);
+        }
 
-        CategoriaResponseDto categoriaDto = new CategoriaResponseDto();
-        categoriaDto.id= entity.getCategory().getId();
-        categoriaDto.name = entity.getCategory().getName();
-        categoriaDto.description = entity.getCategory().getDescription();
-        dto.category = categoriaDto;
+        dto.user= ownerDto;
+        dto.categories = list;
+
         
         return dto;
     }
 
     @Override
     public ProductResponseDto update(int id, UpdateProductDto dto) {
-        return productRepo.findById((long) id)
-                .map(Product::fromEntity)
-                .map(product -> product.update(dto))
-                .map(Product::toEntity)
-                .map(productRepo::save)
-                .map(Product::fromEntity)
-                .map(Product::toResponseDto)
-                .orElseThrow(() -> new NotFoundException("Producto no encontrado"));
+        ProductEntity existing = productRepo.findById((long) id)
+            .orElseThrow(() -> new NotFoundException("Producto no encontrado"));
+
+        // Mantener owner y categoría actual, permitir cambiar categoría si llega
+        UserEntity owner = existing.getOwner();
+        CategoriaEntity categoria = existing.getCategories();
+        if (dto.categoryId != null) {
+            categoria = categorieRepo.findById(dto.categoryId)
+                .orElseThrow(() -> new NotFoundException("categoria no existe"));
+        }
+
+        // Aplicar cambios de datos primitivos (name, description, price, stock opcional)
+        Product domain = Product.fromEntity(existing).update(dto);
+
+        ProductEntity saved = productRepo.save(domain.toEntity(owner, categoria));
+        return toResponseDto(saved);
     }
 
     @Override
@@ -165,6 +191,21 @@ public class ProductServiceImpl implements ProductService {
         return ProductMapper.toResponse(Product.fromEntity(saved));
     }
 
+    @Override
+    public List<ProductResponseDto> findByUser(long userId) {
+        return productRepo.findByOwnerId(userId)
+            .stream()
+            .map(this::toResponseDto)
+            .toList();
+    }
+
+    @Override
+    public List<ProductResponseDto> findByCategory(long categoryId) {
+        return productRepo.findByCategoriesId(categoryId)
+            .stream()
+            .map(this::toResponseDto)
+            .toList();
+    }
 
     
 }

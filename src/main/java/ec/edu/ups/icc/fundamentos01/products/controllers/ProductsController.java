@@ -38,6 +38,16 @@ public class ProductsController {
 		return service.findAll();
 	}
 
+	@GetMapping("/user/{userId}")
+	public List<ProductResponseDto> findByUser(@PathVariable("userId") long userId) {
+		return service.findByUser(userId);
+	}
+
+	@GetMapping("/category/{categoryId}")
+	public List<ProductResponseDto> findByCategory(@PathVariable("categoryId") long categoryId) {
+		return service.findByCategory(categoryId);
+	}
+
 	@GetMapping("/{id}")
 	public ProductResponseDto findOne(@PathVariable("id") int id) {
 		return service.findOne(id);
@@ -78,7 +88,5 @@ public class ProductsController {
 		
 		
 		return service.secureUpdate(id, dto);
-	}
-
-	
+	}	
 }

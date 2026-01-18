@@ -1,6 +1,7 @@
 package ec.edu.ups.icc.fundamentos01.products.models;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import ec.edu.ups.icc.fundamentos01.Categories.entity.CategoriaEntity;
 import ec.edu.ups.icc.fundamentos01.products.dtos.CreateProductDto;
@@ -124,7 +125,7 @@ public static Product fromEntity(ProductEntity entity) {
         return product;
     }
 
-    public ProductEntity toEntity(UserEntity owner, CategoriaEntity category) {
+    public ProductEntity toEntity(UserEntity owner, Set<CategoriaEntity>category) {
         ProductEntity entity = new ProductEntity();
         
         if (this.id != null && this.id > 0) {
@@ -136,8 +137,8 @@ public static Product fromEntity(ProductEntity entity) {
         entity.setDescription(this.description);
         
         // Asignar relaciones
-        entity.setOwner(owner);
-        entity.setCategory(category);
+        
+        category.forEach(c -> entity.addCategorie(c));
         
         return entity;
     }
@@ -194,13 +195,15 @@ public static Product fromEntity(ProductEntity entity) {
             throw new IllegalArgumentException("El nombre es obligatorio");
         if (dto.price < 0)
             throw new IllegalArgumentException("El precio no puede ser negativo");
-        if (dto.stock < 0)
+        if (dto.stock != null && dto.stock < 0)
             throw new IllegalArgumentException("El stock no puede ser negativo");
 
         this.name = dto.name;
         this.description = dto.description;
         this.price = dto.price;
-        this.stock = dto.stock;
+        if (dto.stock != null) {
+            this.stock = dto.stock;
+        }
         return this;
     }
 

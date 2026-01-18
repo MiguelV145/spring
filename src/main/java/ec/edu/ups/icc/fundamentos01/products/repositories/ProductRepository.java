@@ -15,10 +15,10 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
     //// select * from products where user:id
     List<ProductEntity> findByOwnerId(Long userId);
-    List<ProductEntity> findByCategoryId(Long categoryId);
+    List<ProductEntity> findByCategoriesId(Long categoryId);
     List<ProductEntity> findByOwnerName(String name);
-    List<ProductEntity> findByCategoryName(String name);
-    List<ProductEntity> findByCategoryIdAndPriceGreaterThan(Long categoryId, Double price);
+    List<ProductEntity> findByCategoriesName(String name);
+    List<ProductEntity> findByCategoriesIdAndPriceGreaterThan(Long categoryId, Double price);
     
     
 }

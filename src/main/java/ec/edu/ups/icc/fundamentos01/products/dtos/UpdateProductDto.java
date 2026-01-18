@@ -1,5 +1,7 @@
 package ec.edu.ups.icc.fundamentos01.products.dtos;
 
+import java.util.List;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,13 +19,13 @@ public class UpdateProductDto {
     @Min(value = 0, message = "El precio no puede ser negativo")
     public Double price;
     
-    @NotNull(message = "El stock es obligatorio")
     @Min(value = 0, message = "El stock no puede ser negativo")
     public Integer stock;
 
 
     public Long categoryId;
 
+    public List<Long> categoriesIds;
     ///No puedo actualizar el dueño 
     
     // Getters

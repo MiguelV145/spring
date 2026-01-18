@@ -24,4 +24,8 @@ public interface ProductService {
 
     ProductResponseDto secureUpdate(int id,  SecureUpdateProductosDto name ) ;
 
+    List<ProductResponseDto> findByUser(long userId);
+
+    List<ProductResponseDto> findByCategory(long categoryId);
+
 }

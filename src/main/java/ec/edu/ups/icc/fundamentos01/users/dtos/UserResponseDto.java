@@ -1,15 +1,20 @@
 package ec.edu.ups.icc.fundamentos01.users.dtos;
 
+import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
+
 public class UserResponseDto {
-    public int id;
+    public Long id;
     public String name;
     public String email;
+    
+    public ProductResponseDto product;
+    
     public String createdAt;
     
-    public int getId() {
+    public Long getId() {
         return id;
     }
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
     public String getName() {
@@ -30,6 +35,11 @@ public class UserResponseDto {
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
-    
+    public ProductResponseDto getProduct() {
+        return product;
+    }
+    public void setProduct(ProductResponseDto product) {
+        this.product = product;
+    }
     
 }

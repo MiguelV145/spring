@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 
 import ec.edu.ups.icc.fundamentos01.exception.domain.ConflictException;
 import ec.edu.ups.icc.fundamentos01.exception.domain.NotFoundException;
+import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
+import ec.edu.ups.icc.fundamentos01.products.models.Product;
+import ec.edu.ups.icc.fundamentos01.products.repositories.ProductRepository;
 import ec.edu.ups.icc.fundamentos01.users.dtos.CreateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.PartialUpdateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.UpdateUserDto;
@@ -14,14 +17,17 @@ import ec.edu.ups.icc.fundamentos01.users.entities.UserEntity;
 import ec.edu.ups.icc.fundamentos01.users.mappers.UserMapper;
 import ec.edu.ups.icc.fundamentos01.users.models.User;
 import ec.edu.ups.icc.fundamentos01.users.repositories.UserRepository;
+import net.bytebuddy.implementation.bytecode.Throw;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepo;
+    private final ProductRepository productRepo;
 
-    public UserServiceImpl(UserRepository userRepo) {
+    public UserServiceImpl(UserRepository userRepo, ProductRepository productRepo) {
         this.userRepo = userRepo;
+        this.productRepo = productRepo;
     }
 
     @Override
@@ -88,4 +94,28 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    @Override
+    public List<ProductResponseDto> getProdutsByUserId(Long userid){
+        if (!userRepo.findById(userid).isPresent()){
+            throw new NotFoundException("Usuario no encontrado");
+        }
+        return productRepo.findByOwnerId(userid)
+            .stream()
+            .map(Product::fromEntity)
+            .map(Product::toResponseDto)
+            .toList();
+    }
+
+    @Override
+    public List<ProductResponseDto> getProductByUserIdWithFilters(Long userId, String name, Double minPrice, Double maxPrice, Long categoryId) {
+        if (userRepo.findById(userId).isEmpty()) {
+            throw new NotFoundException("Usuario no encontrado");
+        }
+
+        return productRepo.findByOwnerWhithFilter(userId, name, minPrice, maxPrice, categoryId)
+            .stream()
+            .map(Product::fromEntity)
+            .map(Product::toResponseDto)
+            .toList();
+    }
 }

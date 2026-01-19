@@ -1,6 +1,7 @@
 package ec.edu.ups.icc.fundamentos01.users.dtos;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 
@@ -17,6 +18,7 @@ public class CreateUserDto {
     @NotBlank(message = "La contraseña es obligatoria")
     @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
     public String password;
+
     
     // Getters
     public String getName() {

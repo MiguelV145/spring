@@ -17,7 +17,7 @@ public class ProductResponseDto {
     
     public CategoriaResponseDto category;
 
-        public List<CategoriaResponseDto> categories;
+    public List<CategoriaResponseDto> categories;
 
         
     public static class UserSummaryDto {

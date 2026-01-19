@@ -4,8 +4,8 @@ import ec.edu.ups.icc.fundamentos01.users.dtos.UserResponseDto;
 import ec.edu.ups.icc.fundamentos01.users.models.User;
 
 public class UserMapper {
-    public static User toEntity(int id, String name, String email) {
-        return new User(id, name, email,"secret");
+    public static User toEntity(Long id, String name, String email) {
+        return new User(name, email,"secret");
 
     }
     

@@ -2,23 +2,25 @@ package ec.edu.ups.icc.fundamentos01.users.models;
 
 import java.time.LocalDateTime;
 
+import ec.edu.ups.icc.fundamentos01.products.entities.ProductEntity;
 import ec.edu.ups.icc.fundamentos01.users.dtos.CreateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.PartialUpdateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.UpdateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.UserResponseDto;
 import ec.edu.ups.icc.fundamentos01.users.entities.UserEntity;
+import java.util.Set;
 
 public class User {
 
      
-    private int id;
+    private Long id;
     private String name;
     private String email;
     private String password;
     private LocalDateTime createdAt;
     
 
-    public User(int id, String name, String email, String password) {
+    public User( String name, String email, String password) {
         if (name == null || name.isBlank())
             throw new IllegalArgumentException("Nombre inválido");
 
@@ -28,7 +30,6 @@ public class User {
         if (password == null || password.length() < 8)
             throw new IllegalArgumentException("Password inválido");
 
-        this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
@@ -37,11 +38,11 @@ public class User {
 
    
     
-public int getId() {
+public Long getId() {
     return id;
 }
 
-public void setId(int id) {
+public void setId(Long id) {
     this.id = id;
 }
 
@@ -88,7 +89,6 @@ public void setCreatedAt(LocalDateTime createdAt) {
      */
     public static User fromDto(CreateUserDto dto) {
         return new User(
-            0,                // id = 0 porque aún no existe en BD
             dto.getName(),
             dto.getEmail(),
             dto.getPassword()
@@ -101,12 +101,13 @@ public void setCreatedAt(LocalDateTime createdAt) {
      * @return instancia de User para lógica de negocio
      */
     public static User fromEntity(UserEntity entity) {
-        return new User(
-            entity.getId().intValue(),
-            entity.getName(),
-            entity.getEmail(),
-            entity.getPassword()
-        );
+        User user = new User(
+            entity.getName(),entity.getEmail(), entity.getPassword());
+            
+        user.id=entity.getId();
+
+        return user;
+
     }
 
     // ==================== CONVERSION METHODS ====================
@@ -119,13 +120,30 @@ public void setCreatedAt(LocalDateTime createdAt) {
         UserEntity entity = new UserEntity();
 
         // Si ya tiene id, lo asignamos (para updates)
-        if (this.id > 0) {
+        if (this.id != null && this.id > 0) {
             entity.setId((long) this.id);
         }
 
         entity.setName(this.name);
         entity.setEmail(this.email);
         entity.setPassword(this.password);
+        return entity;
+    }
+
+    public UserEntity toEntity(Set<ProductEntity> products) {
+        UserEntity entity = new UserEntity();
+
+        // Si ya tiene id, lo asignamos (para updates)
+        if (this.id != null && this.id > 0) {
+            entity.setId((long) this.id);
+        }
+
+        entity.setName(this.name);
+        entity.setEmail(this.email);
+        entity.setPassword(this.password);
+
+        products.forEach(p -> entity.addProducto(p));    
+
         return entity;
     }
 
@@ -177,5 +195,8 @@ public void setCreatedAt(LocalDateTime createdAt) {
         }
         return this;
     }
+
+
+
 
 }

@@ -20,6 +20,8 @@ public class Product {
     private double price;
     private int stock;
     private LocalDateTime createdAt;
+    private Set<CategoriaEntity> categories;
+    private UserEntity owner;
 
     // ==================== CONSTRUCTORES ====================
 
@@ -122,6 +124,8 @@ public static Product fromEntity(ProductEntity entity) {
             entity.getDescription()
         );
         product.id = entity.getId();
+        product.categories = entity.getCategories();
+        product.owner = entity.getOwner();
         return product;
     }
 
@@ -137,6 +141,7 @@ public static Product fromEntity(ProductEntity entity) {
         entity.setDescription(this.description);
         
         // Asignar relaciones
+        entity.setOwner(owner);  // ✅ AGREGAR ESTA LÍNEA
         
         category.forEach(c -> entity.addCategorie(c));
         
@@ -177,9 +182,9 @@ public static Product fromEntity(ProductEntity entity) {
         dto.setDescription(this.description);
         dto.setPrice(this.price);
         dto.setStock(this.stock);
-        if (this.createdAt != null) {
-            dto.setCreatedAt(this.createdAt.toString());
-        }
+        
+  
+     
         return dto;
     }
 

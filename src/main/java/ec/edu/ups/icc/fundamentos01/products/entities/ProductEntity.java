@@ -1,6 +1,7 @@
 package ec.edu.ups.icc.fundamentos01.products.entities;
 
 import java.util.Set;
+import java.util.HashSet;
 
 import ec.edu.ups.icc.fundamentos01.Categories.entity.CategoriaEntity;
 import ec.edu.ups.icc.fundamentos01.core.entities.BaseModel;
@@ -36,7 +37,7 @@ public class ProductEntity extends BaseModel {
     /// Con usuarios donde un usuario puede tener muchos productos 
     /// 
     
-     @ManyToOne(optional = false, fetch= FetchType.LAZY)
+     @ManyToOne(optional = false, fetch= FetchType.EAGER)
      @JoinColumn(name = "user_id", nullable = false)
      private UserEntity owner;
 
@@ -56,7 +57,7 @@ public class ProductEntity extends BaseModel {
         joinColumns = @JoinColumn(name= "product_id"),
         inverseJoinColumns = @JoinColumn(name = "category_id")
      )//tabla intermedia)
-     private Set<CategoriaEntity> categories;
+     private Set<CategoriaEntity> categories = new HashSet<>();
 
     // Getters
     public String getName() {

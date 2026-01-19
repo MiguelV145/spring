@@ -1,7 +1,6 @@
 package ec.edu.ups.icc.fundamentos01.products.services;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -64,28 +63,18 @@ public class ProductServiceImpl implements ProductService {
         UserEntity owner = userRepo.findById(dto.userId)
             .orElseThrow(() -> new NotFoundException("usuario no existe"));
 
-        Set <CategoriaEntity>  categoriaE= validateCategories();
         CategoriaEntity categoria = categorieRepo.findById(dto.categoryId)
             .orElseThrow(() -> new NotFoundException("categoria no existe"));
         //Convierte DTO-> Domain
         Product newProduct= Product.fromDto(dto);
 
-        ProductEntity entity= newProduct.toEntity(owner, categoria);
+        ProductEntity entity= newProduct.toEntity(owner, Set.of(categoria));
         //Persistir
         ProductEntity saved =productRepo.save(entity);
 
         return toResponseDto(saved);
     }
 
-    private Set<CategoriaEntity> validateCategories(Set <Long> categoryIds) {
-        Set<CategoriaEntity> list= new HashSet<>();
-        for(Long categoryId: categoryIds){
-            CategoriaEntity category = categorieRepo.findById(categoryId)
-            .orElseThrow(() -> new NotFoundException("Categoria no encontrada con ID:" + categoryIds ));
-            list.add(category);
-        }
-        return list;
-    }
 
     private ProductResponseDto toResponseDto( ProductEntity entity){
         ProductResponseDto dto= new ProductResponseDto();
@@ -94,18 +83,22 @@ public class ProductServiceImpl implements ProductService {
         dto.price= entity.getPrice();
         dto.description= entity.getDescription();
 
-        ProductResponseDto.UserSummaryDto ownerDto= new ProductResponseDto.UserSummaryDto();
-        ownerDto.id = entity.getOwner().getId().intValue();
-        ownerDto.name =entity.getOwner().getName();
-        dto.user = ownerDto;
-
-        List<CategoriaResponseDto> list = new ArrayList();
-        for (CategoriaEntity cat : entity.getCategories()){
-            CategoriaResponseDto categoryDto= new CategoriaResponseDto();
-        list.add(categoryDto);
+        // Asignar owner si existe
+        if (entity.getOwner() != null) {
+            ProductResponseDto.UserSummaryDto ownerDto= new ProductResponseDto.UserSummaryDto();
+            ownerDto.id = entity.getOwner().getId().intValue();
+            ownerDto.name = entity.getOwner().getName();
+            dto.user = ownerDto;
         }
 
-        dto.user= ownerDto;
+        List<CategoriaResponseDto> list = new ArrayList<CategoriaResponseDto>();
+        for (CategoriaEntity cat : entity.getCategories()){
+            CategoriaResponseDto categoryDto= new CategoriaResponseDto();
+            categoryDto.id = cat.getId();
+            categoryDto.name = cat.getName();
+            list.add(categoryDto);
+        }
+
         dto.categories = list;
 
         
@@ -119,16 +112,17 @@ public class ProductServiceImpl implements ProductService {
 
         // Mantener owner y categoría actual, permitir cambiar categoría si llega
         UserEntity owner = existing.getOwner();
-        CategoriaEntity categoria = existing.getCategories();
+        Set<CategoriaEntity> categorias = existing.getCategories();
         if (dto.categoryId != null) {
-            categoria = categorieRepo.findById(dto.categoryId)
+            CategoriaEntity newCategoria = categorieRepo.findById(dto.categoryId)
                 .orElseThrow(() -> new NotFoundException("categoria no existe"));
+            categorias = Set.of(newCategoria);
         }
 
         // Aplicar cambios de datos primitivos (name, description, price, stock opcional)
         Product domain = Product.fromEntity(existing).update(dto);
 
-        ProductEntity saved = productRepo.save(domain.toEntity(owner, categoria));
+        ProductEntity saved = productRepo.save(domain.toEntity(owner, categorias));
         return toResponseDto(saved);
     }
 

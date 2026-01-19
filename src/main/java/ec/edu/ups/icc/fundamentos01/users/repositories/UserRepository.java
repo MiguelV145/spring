@@ -12,6 +12,4 @@ import ec.edu.ups.icc.fundamentos01.users.entities.UserEntity;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Optional<UserEntity> findByEmail(String email);
 
-    Optional<ProductEntity> findByUserWhitFilters(Long userId, String name, Double minPrice, Double maxPrice, Long categoryId);
-    
 }
